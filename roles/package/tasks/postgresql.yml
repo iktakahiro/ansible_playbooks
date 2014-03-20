@@ -1,0 +1,38 @@
+---
+- name: Be sure dependency packages are installed.
+  yum: name={{ item }} state=installed
+  with_items:
+    - readline-devel
+    - zlib-devel
+
+- name: Be sure PostgreSQL groups are created.
+  group: name={{ item }}
+  with_items:
+    - postgres
+
+- name: Be sure PostgreSQL users are created.
+  user: name={{ item }} shell=/bin/bash group={{ item }} groups={{ item }}
+  with_items:
+    - postgres
+
+- name: Be sure PostgreSQL data directory is created.
+  file: path={{ directories.PostgreSQL.data }} state=directory owner=postgres group=postgres mode=0700
+
+- name: Be sure PostgreSQL tarball is downloaded.
+  get_url: url={{ base.get_url }}postgresql-{{ versions.PostgreSQL }}.tar.gz dest={{ directories.common.src }}
+
+- name: Be sure PostgreSQL tarball is expanded.
+  command: tar zxf postgresql-{{ versions.PostgreSQL }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure PostgreSQL is installed.
+  shell: >
+    ./configure --prefix={{ directories.PostgreSQL.prefix }} &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}postgresql-{{ versions.PostgreSQL }}
+
+- name: Be sure init script is created.
+  template: src=init/init_postgres.j2 dest=/etc/init.d/postgres owner=root group=root mode=0744
+
+- name: Be sure profile is created.
+  template: src=profile/profile_postgresql.j2 dest=/etc/profile.d/postgresql.sh owner=root group=root mode=0644

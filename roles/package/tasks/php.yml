@@ -1,0 +1,81 @@
+---
+- name: Be sure dependency packages are installed.
+  yum: name={{ item }} state=installed
+  with_items:
+    - libjpeg-devel
+    - libpng-devel
+    - freetype-devel
+    - gd-devel
+    - libxml2-devel
+    - openssl-devel
+    - libcurl-devel
+    - libmcrypt-devel
+    - libxslt-devel
+
+- name: Be sure libiconv tarball is downloaded.
+  get_url: url={{ base.get_url }}libiconv-{{ versions.libiconv }}.tar.gz dest={{ directories.common.src }}
+
+- name: Be sure libiconv tarball is expanded.
+  command: tar zxf libiconv-{{ versions.libiconv }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure libiconv is installed.
+  shell: >
+    ./configure
+    --prefix=/usr/local &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}libiconv-{{ versions.libiconv }}
+
+- name: Be sure PHP tarball is downloaded.
+  get_url: url={{ base.get_url }}php-{{ versions.PHP }}.tar.gz dest={{ directories.common.src }}
+
+- name: Be sure PHP tarball is expanded.
+  command: tar zxf php-{{ versions.PHP }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure PHP is installed.
+  shell: >
+    ./configure
+    --prefix={{ directories.PHP.prefix }}
+    --with-config-file-path={{ directories.PHP.prefix }}lib
+    --with-openssl
+    --with-zlib=/usr
+    --with-curl
+    --with-pcre-dir=/usr
+    --with-gd
+    --with-jpeg-dir=/usr
+    --with-png-dir=/usr
+    --with-freetype-dir=/usr
+    --with-gettext=/usr
+    --with-gmp=/usr
+    --with-xsl=/usr
+    --with-mcrypt
+    --with-iconv=/usr/local
+    --with-pgsql=/usr/local/pgsql
+    --with-pdo-pgsql=/usr/local/pgsql
+    --enable-exif
+    --enable-zip
+    --enable-gd-native-ttf
+    --enable-mbstring
+    --enable-fpm
+    --without-mysql &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}php-{{ versions.PHP }}
+
+- name: Be sure php.ini is created.
+  template: src=conf/php.ini.j2 dest={{ directories.PHP.prefix}}lib/php.ini owner=nginx group=nginx mode=0755
+
+- name: Be sure php-fpm.conf.j2 is created.
+  template: src=conf/php-fpm.conf.j2 dest={{ directories.PHP.prefix }}etc/php-fpm.conf
+
+- name: Be sure PHP-fpm run directory is created.
+  file: path={{ directories.PHP_fpm.run }} state=directory owner=nginx group=nginx mode=0755
+
+- name: Be sure PHP-fpm log directory is created.
+  file: path={{ directories.PHP_fpm.log }} state=directory owner=nginx group=nginx mode=0755
+
+- name: Be sure init script is created.
+  template: src=init/init_php-fpm.j2 dest=/etc/init.d/php-fpm owner=root group=root mode=0744
+
+- name: Be sure profile is created.
+  template: src=profile/profile_php.j2 dest=/etc/profile.d/php.sh owner=root group=root mode=0644

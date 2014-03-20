@@ -1,0 +1,56 @@
+---
+- name: Be sure MySQL groups are created.
+  group: name={{ item }}
+  with_items:
+    - mysql
+
+- name: Be sure MySQL users are created.
+  user: name={{ item }} shell=/sbin/nologin group={{ item }} groups={{ item }}
+  with_items:
+    - mysql
+
+- name: Be sure MySQL data directory is created.
+  file: path={{ directories.MySQL.data }} state=directory owner=mysql group=mysql mode=0700
+
+- name: Be sure CMake tarball is downloaded.
+  get_url: url={{ base.get_url }}cmake-{{ versions.CMake }}.tar.gz dest={{ directories.common.src }}
+
+- name: Be sure CMake tarball is expanded.
+  command: tar zxf cmake-{{ versions.CMake }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure CMake is installed.
+  shell: >
+    ./configure
+    --prefix=/usr/local &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}cmake-{{ versions.CMake }}
+
+- name: Be sure MySQL tarball is downloaded.
+  get_url: url={{ base.get_url }}mysql-{{ versions.MySQL }}.tar.gz dest={{ directories.common.src }}
+
+- name: Be sure MySQL tarball is expanded.
+  command: tar zxf mysql-{{ versions.MySQL }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure MySQL is installed.
+  shell: >
+    /usr/local/bin/cmake
+    -DCMAKE_INSTALL_PREFIX=/usr/local/mysql
+    -DSYSCONFDIR=/etc
+    -DMYSQL_DATADIR={{ directories.MySQL.data }}
+    -DDEFAULT_CHARSET=utf8
+    -DDEFAUTL_COLLATION=utf8_general_ci
+    -DWITH_EXTRA_CHARSETS=all
+    -DWITH_PIC=1 &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}mysql-{{ versions.MySQL }}
+
+- name: Be sure init script is created.
+  template: src=init/init_mysql.j2 dest=/etc/init.d/mysql owner=root group=root mode=0744
+
+- name: Be sure profile is created.
+  template: src=profile/profile_mysql.j2 dest=/etc/profile.d/mysql.sh owner=root group=root mode=0644
+
+- name: Be sure my.cnf is created.
+  template: src=conf/my.cnf.j2 dest=/etc/my.cnf owner=mysql group=mysql mode=0644

@@ -1,0 +1,36 @@
+---
+- name: Be sure Tomcat groups are created.
+  group: name={{ item }}
+  with_items:
+    - tomcat
+
+- name: Be sure Tomcat users are created.
+  user: name={{ item }} shell=/sbin/nologin group={{ item }} groups={{ item }}
+  with_items:
+    - tomcat
+
+- name: Be sure Tomcat7 is downloaded.
+  get_url: url={{ base.get_url }}apache-tomcat-{{ versions.Tomcat7 }}.tar.gz dest={{ directories.common.src }}
+  tags: common
+
+- name: Be sure Tomcat7 directory is created.
+  file: path={{ directories.Tomcat.prefix }} state=directory
+
+- name: Be sure Tomcat7 tarball is expanded.
+  command: tar zxf apache-tomcat-{{ versions.Tomcat7 }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure Tomcat7 is installed.
+  shell: >
+    cp -rp {{ directories.common.src }}apache-tomcat-{{ versions.Tomcat7 }}/* {{ directories.Tomcat.prefix }} &&
+    chown -R tomcat:tomcat {{ directories.Tomcat.prefix}}
+    chdir={{ directories.common.src }}
+
+- name: Be sure init script is created.
+  template: src=init/init_tomcat.j2 dest=/etc/init.d/tomcat owner=root group=root mode=0744
+
+- name: Be sure profile is created.
+  template: src=profile/profile_tomcat.j2 dest=/etc/profile.d/tomcat.sh owner=root group=root mode=0755
+
+- name: Be sure setenv created.
+  template: src=profile/setenv_tomcat7.j2 dest={{ directories.Tomcat.prefix}}bin/setenv.sh owner=tomcat group=tomcat mode=0755
+

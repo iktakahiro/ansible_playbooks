@@ -1,0 +1,53 @@
+#!/bin/bash
+#
+# tomcat - this script starts and stops the tomcat daemon
+#
+# chkconfig:   - 85 15
+# description: Tomcat is a Java application  server
+# processname: tomcat
+# pidfile:     /var/run/tomcat.pid
+
+# source function library
+. /etc/rc.d/init.d/functions
+source /etc/profile.d/tomcat.sh
+
+start(){
+    if [ -z $(/sbin/pidof java) ]; then
+        echo "Starting tomcat"
+        sudo -u tomcat {{ directories.Tomcat.prefix }}bin/startup.sh
+        touch /var/lock/subsys/tomcat
+    else
+        echo "tomcat is already running"
+    fi
+}
+
+stop(){
+    if [ ! -z $(/sbin/pidof java) ]; then
+        echo "Shutting down tomcat"
+        sudo -u tomcat {{ directories.Tomcat.prefix }}bin/shutdown.sh
+        until [ -z $(/sbin/pidof java) ]; do :; done
+        rm -f /var/lock/subsys/tomcat
+    else
+        echo "tomcat is not running"
+    fi
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    status)
+        {{ directories.Tomcat.prefix }}bin/catalina.sh version
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+esac
+
+exit 0

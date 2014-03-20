@@ -1,0 +1,20 @@
+---
+- name: Be sure default groups are created.
+  group: name={{ item.name }}
+  with_items:
+    - "{{ users }}"
+
+- name: Be sure default users are created.
+  user: name={{ item.name }} shell=/bin/bash group={{ item.name }} groups={{ item.secondary_groups}}
+  with_items:
+    - "{{ users }}"
+
+- name: Be sure ssh directories are created.
+  file: dest=/home/{{ item.name }}/.ssh state=directory owner={{ item.name }} group={{ item.primary_group }} mode=700
+  with_items:
+    - "{{ users }}"
+
+- name: Be sure ssh authorized_keys are created.
+  copy: src=pub_key/{{ item.name }}.pub dest=/home/{{ item.name }}/.ssh/authorized_keys owner={{ item.name }} group={{ item.primary_group }} mode=600
+  with_items:
+    - "{{ users }}"

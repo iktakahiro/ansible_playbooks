@@ -1,0 +1,65 @@
+---
+- name: Be sure dependency packages are installed.
+  yum: name={{ item }} state=installed
+  with_items:
+    - pcre
+    - pcre-devel
+
+- name: Be sure Nginx groups are created.
+  group: name={{ item }}
+  with_items:
+    - nginx
+
+- name: Be sure Nginx users are created.
+  user: name={{ item }} shell=/sbin/nologin group={{ item }} groups={{ item }}
+  with_items:
+    - nginx
+
+- name: Be sure Nginx data run directory is created.
+  file: path=/var/run/nginx state=directory owner=nginx group=nginx mode=755
+
+- name: Be sure Nginx data log directory is created.
+  file: path=/var/log/nginx state=directory owner=nginx group=nginx mode=755
+
+- name: Be sure Nginx tarball is downloaded.
+  get_url: url={{ base.get_url }}nginx-{{ versions.Nginx }}.tar.gz dest={{ directories.common.src }}
+
+- name: Be sure Nginx tarball is expanded.
+  command:  tar zxf nginx-{{ versions.Nginx }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure zlib tarball is downloaded.
+  get_url: url={{ base.get_url }}zlib-{{ versions.zlib }}.tar.gz dest={{ directories.common.src }}
+
+- name: Be sure zlib tarball is expanded.
+  command:  tar zxf zlib-{{ versions.zlib }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure OpenSSL tarball is downloaded.
+  get_url: url={{ base.get_url }}openssl-{{ versions.OpenSSL }}.tar.gz dest={{ directories.common.src }}
+
+- name: Be sure OpenSSL tarball is expanded.
+  command:  tar zxf openssl-{{ versions.OpenSSL }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure Nginx is installed.
+  shell: >
+    ./configure
+    --prefix={{ directories.Nginx.prefix }}
+    --user=nginx
+    --group=nginx
+    --pid-path=/var/run/nginx/nginx.pid
+    --lock-path=/var/run/nginx/nginx.lock
+    --error-log-path=/var/log/nginx/error.log
+    --http-log-path=/var/log/nginx/access.log
+    --with-openssl=/usr/local/src/openssl-{{ versions.OpenSSL }}
+    --with-zlib=/usr/local/src/zlib-{{ versions.zlib }}
+    --with-http_ssl_module
+    --with-http_realip_module
+    --without-http_ssi_module &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}nginx-{{ versions.Nginx }}
+
+- name: Be sure init script is created.
+  template: src=init/init_nginx.j2 dest=/etc/init.d/nginx owner=root group=root mode=0744
+
+- name: Be sure logrotate script is created.
+  template: src=logrotate/logrotate_nginx.j2 dest=/etc/logrotate.d/nginx owner=root group=root mode=0744

@@ -1,0 +1,19 @@
+{
+    "base": {
+        "get_url" : "https://example.com/"
+    },
+    "users": [
+        {
+            "name": "test1",
+            "primary_group": "test1",
+            "secondary_groups": "wheel",
+            "public_key": "test1.pub"
+        },
+        {
+            "name": "test2",
+            "primary_group": "test2",
+            "secondary_groups": "wheel",
+            "public_key": "test2.pub"
+        }
+    ]
+}

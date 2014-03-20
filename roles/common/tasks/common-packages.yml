@@ -1,0 +1,28 @@
+---
+- name: Be sure common packages are installed.
+  yum: name={{ item }} state=installed
+  with_items:
+    - ntp
+    - gcc
+    - gcc-c++
+    - make
+    - ftp
+    - zip
+    - unzip
+    - sysstat
+    - expect
+    - gmp-devel
+    - vim-enhanced
+    - pam-devel
+    - net-snmp
+    - net-snmp-devel
+    - tcp_wrappers-devel
+    - ld-linux.so.2
+    - dos2unix
+    - ncurses-devel
+    - libevent-devel
+    - mdadm
+    - m4
+    - xfsprogs
+    - tmux
+  tags: common-packages

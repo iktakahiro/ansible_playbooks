@@ -1,0 +1,16 @@
+---
+- name: Be sure JDK1.7 is downloaded.
+  get_url: url={{ base.get_url }}jdk{{ versions.Java7 }}.tar.gz dest={{ directories.common.src }}
+  tags: common
+
+- name: Be sure Java directory is created.
+  file: path={{ directories.Java7.prefix }} state=directory
+
+- name: Be sure Java7 is installed.
+  shell: >
+    tar zxf jdk{{ versions.Java7 }}.tar.gz &&
+    cp -rp {{ directories.common.src }}jdk{{ versions.Java7 }} {{ directories.Java7.prefix }}
+    chdir={{ directories.common.src }}
+
+- name: Be sure profile is created.
+  template: src=profile/profile_java7.j2 dest=/etc/profile.d/java7.sh owner=root group=root mode=0755

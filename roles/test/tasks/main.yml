@@ -1,0 +1,8 @@
+---
+- include: ../../package/tasks/java7.yml
+- include: ../../package/tasks/tomcat7.yml
+- include: ../../package/tasks/python3.yml
+- include: ../../package/tasks/postgresql.yml
+- include: ../../package/tasks/mysql.yml
+- include: ../../package/tasks/nginx.yml
+- include: ../../package/tasks/php.yml

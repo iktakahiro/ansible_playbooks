@@ -1,0 +1,166 @@
+
+[mysqld]
+##--------------------------------------------------------------------
+# mysqld basic
+##--------------------------------------------------------------------
+
+server-id = 1
+user = mysql
+
+basedir = /usr/local/mysql/current
+datadir = /usr/local/mysql/current/data
+tmpdir  = /usr/local/mysql/current/tmp
+socket  = /usr/local/mysql/current/tmp/mysql.sock
+pid-file = /usr/local/mysql/current/data/mysqld.pid
+
+skip-external-locking
+
+character-set-server = utf8
+collation-server = utf8_general_ci
+
+default-storage-engine  = innodb
+transaction-isolation = REPEATABLE-READ
+
+##--------------------------------------------------------------------
+# Network setting
+##--------------------------------------------------------------------
+
+port = 3306
+
+skip-name-resolve
+
+#thread_handling = pool-of-threads
+#thread_pool_size = 32
+#thread_pool_max_threads = 1024
+#thread_pool_idle_timeout = 10
+
+max_connections = 300
+max_user_connections = 0
+max_connect_errors = 1000000
+
+wait_timeout = 600
+interactive_timeout = 600
+connect_timeout = 10
+
+max_allowed_packet = 20GB
+
+##--------------------------------------------------------------------
+# Logging
+##--------------------------------------------------------------------
+
+log_output = FILE
+log_warnings = 1
+log_error = /usr/local/mysql/current/logs/mysqld_error.log
+
+general_log = 0
+general_log_file = /usr/local/mysql/current/logs/general_query_all.log
+
+log-slow-admin-statements = 1
+log-queries-not-using-indexes = 1
+slow_query_log = 1
+long_query_time = 2
+slow_query_log_file = /usr/local/mysql/current/logs/slow_query.log
+
+log-bin=mysql-bin
+
+expire_logs_days = 5
+
+##--------------------------------------------------------------------
+# Cache,Memory
+##--------------------------------------------------------------------
+
+thread_cache_size = 52
+table_open_cache = 400
+max_heap_table_size = 33554432
+tmp_table_size = 524288
+sort_buffer_size = 4MB #128kb
+read_buffer_size = 131072
+read_rnd_buffer_size = 1MB
+join_buffer_size = 131072
+query_cache_size = 52MB
+query_cache_limit = 2097152
+table_open_cache = 1800 # mysql 5.6
+
+##--------------------------------------------------------------------
+# MyISAM 
+##--------------------------------------------------------------------
+
+key_buffer_size = 128MB #33554432
+bulk_insert_buffer_size = 8MB #33554432
+myisam_sort_buffer_size = 2097152
+myisam_max_sort_file_size = 2147483648
+myisam_recover_options = DEFAULT
+
+##--------------------------------------------------------------------
+# InnoDB behavior
+##--------------------------------------------------------------------
+
+innodb_file_format = Barracuda
+innodb_read_io_threads = 4
+innodb_write_io_threads = 4
+innodb_stats_on_metadata = 1
+innodb_max_dirty_pages_pct = 90
+innodb_adaptive_hash_index = 1
+innodb_adaptive_flushing = 1
+innodb_strict_mode = 1
+innodb_io_capacity = 600
+innodb_autoinc_lock_mode = 1
+innodb_change_buffering = inserts
+innodb_old_blocks_time = 500
+
+##--------------------------------------------------------------------
+# InnoDB base
+##--------------------------------------------------------------------
+
+innodb_buffer_pool_size = 1GB #1073741824
+innodb_data_home_dir = /usr/local/mysql/current/data/InnoDB
+innodb_data_file_path = ib_data:100M:autoextend
+innodb_file_per_table = 1
+innodb_autoextend_increment = 10MB
+innodb_log_group_home_dir = /usr/local/mysql/current/data/InnoDB/redoLogs
+innodb_fast_shutdown = 0
+innodb_log_files_in_group = 4
+innodb_log_file_size = 268435456
+innodb_log_buffer_size = 16777216
+innodb_additional_mem_pool_size = 8MB
+innodb_support_xa = FALSE
+innodb_thread_concurrency = 100 #0
+innodb_lock_wait_timeout = 60
+innodb_flush_log_at_trx_commit = 1
+innodb_force_recovery = 0
+innodb_flush_method = O_DIRECT
+innodb_doublewrite = 1
+innodb_sync_spin_loops = 20
+innodb_table_locks = 1
+innodb_thread_sleep_delay = 1000
+innodb_max_purge_lag = 0
+innodb_commit_concurrency = 0
+innodb_concurrency_tickets = 500
+
+##--------------------------------------------------------------------
+# mysqldump
+##--------------------------------------------------------------------
+[mysqldump]
+
+quick
+max_allowed_packet = 20GB
+
+##--------------------------------------------------------------------
+# mysql console
+##--------------------------------------------------------------------
+[mysql]
+
+default-character-set = utf8
+no-auto-rehash
+show-warnings
+prompt=\u@\h:\d\_\R:\m:\\s>
+pager="less -n -i -F -X -E"
+
+##--------------------------------------------------------------------
+# mysql client
+##--------------------------------------------------------------------
+[client]
+
+socket  = /usr/local/mysql/current/tmp/mysql.sock
+port = 3306
+
