@@ -2,7 +2,13 @@
 
 ## What is this
 
-[Ansible](http://www.ansible.com/home)で各種ソフトウェアを導入するPlaybookです。
+This is playbooks of [Ansible](http://www.ansible.com/home).
+
+This directory structure is based on the [Official Best Practies](http://docs.ansible.com/playbooks_best_practices.html). (But, It is very difficult to be beautiful struncture.)
+
+If you want to learn about the Playbook, Please see the details below.
+
+- [Playbooks - Ansible ](http://docs.ansible.com/playbooks.html)
 
 ## Dependencies
 
@@ -18,20 +24,27 @@
 - Nginx
 - PHP
 
+## Target Linux Distribution
+
+- [Amazon Linux](http://aws.amazon.com/jp/amazon-linux-ami/) 2013.09 and higher
+- [CentOS](http://www.centos.org) 6 (need EPEL)
+
 ## How to use
 
 When you want to install Python3.3 and PostgreSQL, take the following steps.
 
-### Edit ./hosts
+### Edit files
 
-```
+./hosts
+
+```ini:hosts
 [test-servers]
 192.168.10.7
 ```
 
-### Edit ./test.yaml
+./test.yaml
 
-```yaml
+```yaml:test.yaml
 ---
 - hosts: test-servers
   sudo: yes
@@ -43,9 +56,9 @@ When you want to install Python3.3 and PostgreSQL, take the following steps.
     - test
 ```
 
-### Edit ./roles/test/tasks/main.yml
+./roles/test/tasks/main.yml
 
-```yaml
+```yaml:main.yml
 --
 - include: ../../common/tasks/common-packages.yml
 - include: ../../package/tasks/python3.yml
