@@ -1,5 +1,8 @@
 # Ansible Playbooks
 
+version 1.0
+Released: 21-May-2014
+
 ## What is this
 
 This is playbooks of [Ansible](http://www.ansible.com/home).
