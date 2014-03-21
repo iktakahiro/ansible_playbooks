@@ -4,8 +4,6 @@
 
 This is playbooks of [Ansible](http://www.ansible.com/home).
 
-This directory structure is based on the [Official Best Practies](http://docs.ansible.com/playbooks_best_practices.html). (But, It is very difficult to be beautiful struncture.)
-
 If you want to learn about the Playbook, Please see the details below.
 
 - [Playbooks - Ansible ](http://docs.ansible.com/playbooks.html)
@@ -90,6 +88,8 @@ ansible-playbook -i hosts test.yml
     - /etc/init.d/postgres
 
 ## Tree (Just for reference)
+
+This directory structure is based on the [Official Best Practies](http://docs.ansible.com/playbooks_best_practices.html). (But, It is very difficult to be beautiful struncture.)
 
 ```
 ├── common
