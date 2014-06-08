@@ -1,9 +1,0 @@
----
-- hosts: test-servers
-  sudo: yes
-  user: ec2-user
-  vars_files:
-    - roles/common/vars/vars.json
-    - roles/package/vars/vars.json
-  roles:
-    - test

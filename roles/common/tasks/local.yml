@@ -1,0 +1,20 @@
+---
+- name: Be sure /etc/sysconfig/clock _ ZONE is configured.
+  lineinfile: dest=/etc/sysconfig/clock regexp='^ZONE.*' line='ZONE="Asia/Tokyo"'
+
+- name: Be sure /etc/sysconfig/clock _ UCT is configured.
+  lineinfile: dest=/etc/sysconfig/clock regexp='^UTC.*' line='UTC=false'
+
+- name: Be sure /etc/sysconfig/i18n _ LANG is configured.
+  lineinfile: dest=/etc/sysconfig/i18n regexp='^LANG.*' line='LANG="ja_JP.UTF-8"'
+
+- name: Be sure /etc/sysconfig/i18n is _ SUPPORTED configured.
+  lineinfile: dest=/etc/sysconfig/i18n regexp='^SUPPORTED.*' line='SUPPORTED="ja_JP.UTF-8:ja_JP:ja"'
+
+- name: Be sure /etc/sysconfig/i18n is _ SYSFONT configured.
+  lineinfile: dest=/etc/sysconfig/i18n regexp='^SYSFONT.*' line='SYSFONT="latarcyrheb-sun16"'
+
+- name: /etc/localtime is configured.
+  shell: >
+    mv -f /etc/localtime /etc/localtime_default &&
+    cp -p /usr/share/zoneinfo/Asia/Tokyo /etc/localtime

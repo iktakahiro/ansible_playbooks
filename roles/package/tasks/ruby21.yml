@@ -1,0 +1,23 @@
+---
+- name: Ruby2.1 = Be sure tarball is downloaded.
+  get_url: url={{ base.get_url }}ruby-{{ versions.Ruby21 }}.tar.gz dest={{ directories.common.src }}
+
+- name: Ruby2.1 = Be sure tarball is expanded.
+  command: tar zxf ruby-{{ versions.Ruby21 }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Ruby2.1 = Be sure Ruby2.1 is installed.
+  shell: >
+    ./configure
+    --prefix={{ directories.Ruby21.prefix }}
+    --enable-shared
+    --without-gmp &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}ruby-{{ versions.Ruby21 }}
+
+- name: Ruby2.1 = Be sure profile is created.
+  template: src=profile/profile_ruby21.j2 dest=/etc/profile.d/ruby21.sh owner=root group=root mode=0644
+
+- name: Ruby2.1 = bundler is installed.
+  shell: >
+    {{ directories.Ruby21.prefix }}bin/gem install bundler

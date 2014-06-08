@@ -1,0 +1,25 @@
+---
+- name: Be sure OpenSSH tar ball is downloaded.
+  get_url: url={{ base.get_url }}openssh-{{ versions.OpenSSH }}.tar.gz dest={{ directories.common.src }}
+  tags: common
+
+- name: Be sure OpenSSH old source is deleted.
+  file: path={{ directories.common.src }}openssh-{{ versions.OpenSSH }} state=absent
+
+- name: Be sure OpenSSH tarball is expanded.
+  command: tar zxf openssh-{{ versions.OpenSSH }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure OpenSSH is installed.
+  shell: >
+    ./configure
+    --prefix=/usr
+    --sysconfdir=/etc/ssh
+    --with-ssl-dir=/usr
+    --libexecdir=/usr/libexec/openssh
+    --with-md5-passwords
+    --with-tcp-wrappers
+    --with-pam &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}openssh-{{ versions.OpenSSH }}
+

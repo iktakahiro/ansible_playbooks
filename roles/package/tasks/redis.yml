@@ -1,0 +1,40 @@
+---
+- name: Redis = Be sure Redis groups are created.
+  group: name={{ item }}
+  with_items:
+    - redis
+
+- name: Redis = Be sure Redis users are created.
+  user: name={{ item }} shell=/sbin/nologin group={{ item }} groups={{ item }}
+  with_items:
+    - redis
+
+- name: Redis = Be sure Zabbix-agent directory is created.
+  file: path={{ item }} state=directory owner=redis group=redis mode=0700
+  with_items:
+      - "{{ directories.Redis.log }}"
+      - "{{ directories.Redis.run }}"
+      - "{{ directories.Redis.data }}"
+      - "{{ directories.Redis.conf }}"
+
+- name: Redis = Be sure Redis tar ball is downloaded.
+  get_url: url={{ base.get_url }}redis-{{ versions.Redis }}.tar.gz dest={{ directories.common.src }}
+
+- name: Redis = Be sure Redis tarball is expanded.
+  command: tar zxf redis-{{ versions.Redis }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Redis = Be sure Redis is installed.
+  shell: >
+    make &&
+    make install
+    chdir={{ directories.common.src }}redis-{{ versions.Redis }}
+
+- name: Redis = Be sure init script is created.
+  template: src=init/init_redis.j2 dest=/etc/init.d/redis owner=root group=root mode=0744
+
+- name: Redis = Be sure Redis base conf is created.
+  template: src=conf/redis.conf.j2 dest={{ directories.Redis.conf }}redis.conf backup=yes owner=redis group=redis mode=0644
+
+- name: Redis = Be sure Redis is started.
+  service: name=redis state=started enabled=yes
+

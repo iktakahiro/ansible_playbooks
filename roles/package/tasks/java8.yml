@@ -1,0 +1,16 @@
+---
+- name: Be sure JDK1.8 is downloaded.
+  get_url: url={{ base.get_url }}jdk{{ versions.Java8 }}.tar.gz dest={{ directories.common.src }}
+  tags: common
+
+- name: Be sure Java directory is created.
+  file: path={{ directories.Java8.prefix }} state=directory
+
+- name: Be sure Java8 is installed.
+  shell: >
+    tar zxf jdk{{ versions.Java8 }}.tar.gz &&
+    cp -rp {{ directories.common.src }}jdk{{ versions.Java8 }} {{ directories.Java8.prefix }}
+    chdir={{ directories.common.src }}
+
+- name: Be sure profile is created.
+  template: src=profile/profile_java8.j2 dest=/etc/profile.d/java8.sh owner=root group=root mode=0755

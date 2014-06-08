@@ -18,3 +18,4 @@
   copy: src=pub_key/{{ item.name }}.pub dest=/home/{{ item.name }}/.ssh/authorized_keys owner={{ item.name }} group={{ item.primary_group }} mode=600
   with_items:
     - "{{ users }}"
+

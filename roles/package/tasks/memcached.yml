@@ -1,0 +1,37 @@
+- name: Memcached = Be sure memcached groups are created.
+  group: name={{ item }}
+  with_items:
+    - memcached
+
+- name: Memcached = Be sure memcached users are created.
+  user: name={{ item }} shell=/sbin/nologin group={{ item }} groups={{ item }}
+  with_items:
+    - memcached
+
+- name: Memcached = Be sure Memcached directory is created.
+  file: path={{ item }} state=directory owner=memcached group=memcached mode=755
+  with_items:
+      - "{{ directories.Memcached.run }}"
+
+- name: Memcahced = Be sure Memcached tarball is downloaded.
+  get_url: url={{ base.get_url }}memcached-{{ versions.Memcached }}.tar.gz dest={{ directories.common.src }}
+
+- name: Memcached = Be sure Memcached tarball is expanded.
+  command: tar zxf memcached-{{ versions.Memcached }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Memcached = Be sure Memcached is installed.
+  shell: >
+    ./configure
+    --prefix={{ directories.Memcached.prefix }} &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}memcached-{{ versions.Memcached }}
+
+- name: Memcached = Be sure init script is created.
+  template: src=init/init_memcached.j2 dest=/etc/init.d/memcached owner=root group=root mode=0744
+
+- name: Memcached = Be sure profile is created.
+  template: src=profile/profile_memcached.j2 dest=/etc/profile.d/memcached.sh owner=root group=root mode=0644
+
+- name: Memcached = Be sure Memcached is started.
+  service: name=memcached state=started enabled=yes

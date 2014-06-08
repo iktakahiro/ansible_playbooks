@@ -1,0 +1,13 @@
+---
+- name: Redis-sentinel = Be sure init script is created.
+  template: src=init/init_redis-sentinel.j2 dest=/etc/init.d/redis-sentinel owner=root group=root mode=0744
+
+- name: Redis-sentinel = Be sure Redis base conf is created.
+  template: src=conf/redis-sentinel.conf.j2 dest={{ directories.Redis.conf }}redis-sentinel.conf backup=yes owner=redis group=redis mode=0644
+
+- name: Redis-sentinel = Be sure Redis is stoped.
+  service: name=redis state=stopped enabled=no
+
+- name: Redis-sentinel = Be sure Redis-sentinel is started.
+  service: name=redis-sentinel state=started enabled=yes
+

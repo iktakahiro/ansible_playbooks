@@ -1,0 +1,51 @@
+---
+- name: Python3.4 = Be sure libgmp is downloaded.
+  get_url: url={{ base.get_url }}gmp-{{ versions.gmp }}.tar.gz dest={{ directories.common.src }}
+
+- name: Python3.4 = Be sure libgmp is expanded.
+  command: tar zxf gmp-{{ versions.gmp }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Python3.4 = Be sure libgmp is installed.
+  shell: >
+    ./configure
+    --libdir=/usr/local/lib64 &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}gmp-{{ versions.gmp }}
+
+- name: Python3.4 = Be sure Python3.4 tarball is downloaded.
+  get_url: url={{ base.get_url }}Python-{{ versions.Python34 }}.tgz dest={{ directories.common.src }}
+
+- name: Python3.4 = Be sure Python3.4 tarball is expanded.
+  command: tar zxf Python-{{ versions.Python34 }}.tgz chdir={{ directories.common.src }}
+
+- name: Python3.4 = Be sure Python3.4 is installed.
+  shell: >
+    ./configure
+    --prefix={{ directories.Python34.prefix }}
+    --enable-shared &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}Python-{{ versions.Python34 }}
+
+- name: Python3.4 = Be sure symbolic link of Python3.4 is created.
+  file: src={{ directories.Python34.prefix }}bin/python3 dest={{ directories.Python34.prefix }}bin/python state=link
+
+- name: Python3.4 = Be sure symbolic link of pip3.4 is created.
+  file: src={{ directories.Python34.prefix }}bin/pip3 dest={{ directories.Python34.prefix }}bin/pip state=link
+
+- name: Python3.4 = Be sure ld.so.conf is configured.
+  lineinfile: dest=/etc/ld.so.conf line={{ directories.Python34.prefix }}lib
+
+- name: Python3.4 = Be sure ld.so.conf is reloaded.
+  command: ldconfig
+
+- name: Python3.4 = Be sure profile is created.
+  template: src=profile/profile_python34.j2 dest=/etc/profile.d/python34.sh owner=root group=root mode=0644
+
+- name: Python3.4 = Be sure Base Libraries are installed.
+  pip: name={{ item }} executable={{ directories.Python34.prefix }}bin/pip
+  with_items:
+    - awscli
+    - paramiko
+

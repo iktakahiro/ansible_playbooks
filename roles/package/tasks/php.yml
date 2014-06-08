@@ -11,6 +11,8 @@
     - libcurl-devel
     - libmcrypt-devel
     - libxslt-devel
+    - openldap-devel
+    - php-ldap
 
 - name: Be sure libiconv tarball is downloaded.
   get_url: url={{ base.get_url }}libiconv-{{ versions.libiconv }}.tar.gz dest={{ directories.common.src }}
@@ -21,7 +23,8 @@
 - name: Be sure libiconv is installed.
   shell: >
     ./configure
-    --prefix=/usr/local &&
+    --prefix=/usr/local
+    --libdir=/usr/local/lib64 &&
     make &&
     make install
     chdir={{ directories.common.src }}libiconv-{{ versions.libiconv }}
@@ -37,6 +40,7 @@
     ./configure
     --prefix={{ directories.PHP.prefix }}
     --with-config-file-path={{ directories.PHP.prefix }}lib
+    --with-libdir=lib64
     --with-openssl
     --with-zlib=/usr
     --with-curl
@@ -52,11 +56,14 @@
     --with-iconv=/usr/local
     --with-pgsql=/usr/local/pgsql
     --with-pdo-pgsql=/usr/local/pgsql
+    --with-ldap
     --enable-exif
     --enable-zip
     --enable-gd-native-ttf
     --enable-mbstring
     --enable-fpm
+    --enable-bcmath
+    --enable-sockets
     --without-mysql &&
     make &&
     make install

@@ -1,0 +1,41 @@
+---
+- name: Be sure Python2.7 tarball is downloaded.
+  get_url: url={{ base.get_url }}Python-{{ versions.Python27 }}.tgz dest={{ directories.common.src }}
+
+- name: Be sure Python2.7 tarball is expanded.
+  command: tar zxf Python-{{ versions.Python27 }}.tgz chdir={{ directories.common.src }}
+
+- name: Be sure Python2.7 is installed.
+  shell: >
+    ./configure
+    --prefix={{ directories.Python27.prefix }}
+    --enable-shared &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}Python-{{ versions.Python27 }}
+
+- name: Be sure ld.so.conf is configured.
+  lineinfile: dest=/etc/ld.so.conf line={{ directories.Python27.prefix }}lib
+
+- name: Be sure ld.so.conf is reloaded.
+  command: ldconfig
+
+- name: Be sure distribute is downloaded.
+  get_url: url={{ base.get_url }}distribute-{{ versions.distribute }}.zip dest={{ directories.common.src }}
+
+- name: Be sure dsistribute is expanded.
+  command: unzip -o distribute-{{ versions.distribute }}.zip chdir={{ directories.common.src }}
+
+- name: Be sure distribute is installed.
+  shell: >
+    {{ directories.Python27.prefix }}bin/python setup.py install
+    chdir={{ directories.common.src }}distribute-{{ versions.distribute }}
+
+- name: Be sure pip is installed.
+  easy_install: name=pip executable={{ directories.Python27.prefix }}bin/easy_install
+
+- name: Be sure awscli is installed.
+  pip: name=awscli executable={{ directories.Python27.prefix }}bin/pip
+
+- name: Be sure profile is created.
+  template: src=profile/profile_python27.j2 dest=/etc/profile.d/python27.sh owner=root group=root mode=0644

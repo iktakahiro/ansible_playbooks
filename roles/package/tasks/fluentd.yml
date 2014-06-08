@@ -1,0 +1,84 @@
+---
+- name: Be sure fluentd groups are created.
+  group: name={{ item }}
+  with_items:
+    - fluentd
+
+- name: Be sure fluentd users are created.
+  user: name={{ item }} shell=/sbin/nologin group={{ item }} groups={{ item }}
+  with_items:
+    - fluentd
+
+- name: Be sure fluentd directory is created.
+  file: path={{ item }} state=directory owner=fluentd group=fluentd mode=0700
+  with_items:
+      - "{{ directories.fluentd.log }}"
+      - "{{ directories.fluentd.run }}"
+      - "{{ directories.fluentd.conf }}"
+      - "{{ directories.fluentd.plugin }}"
+      - "{{ directories.fluentd.buffer }}"
+
+- name: fluentd = Be sure dependency packages are installed.
+  yum: name={{ item }} state=installed
+  with_items:
+    - git
+    - libxml2
+    - libxml2-devel
+    - libxslt
+    - libxslt-devel
+
+- name: fluentd = Be sure tarball is downloaded.
+  get_url: url={{ base.get_url }}ruby-{{ versions.Ruby21 }}.tar.gz dest={{ directories.common.src }}
+
+- name: fluentd = Be sure tarball is expanded.
+  command: tar zxf ruby-{{ versions.Ruby21 }}.tar.gz chdir={{ directories.common.src }}
+
+- name: fluentd = Be sure Ruby2.1 is installed.
+  shell: >
+    ./configure
+    --prefix={{ directories.fluentd.prefix }}
+    --enable-shared
+    --without-gmp &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}ruby-{{ versions.Ruby21 }}
+
+- name: fluentd = Be sure profile is created.
+  template: src=profile/profile_fluentd.j2 dest=/etc/profile.d/fluentd.sh owner=root group=root mode=0644
+
+- name: fluentd = bundler is installed.
+  shell: >
+    {{ directories.fluentd.prefix }}bin/gem install bundler
+
+- name: fluentd = Be sure tarball is downloaded.
+  get_url: url={{ base.get_url }}fluentd-{{ versions.fluentd }}.tar.gz dest={{ directories.common.src }}
+
+- name: fluentd = Be sure tarball is expanded.
+  command: tar zxf fluentd-{{ versions.fluentd }}.tar.gz chdir={{ directories.common.src }}
+
+- name: fluentd = Be sure fluentd is installed.
+  shell: >
+    source /etc/profile.d/fluentd.sh &&
+    {{ directories.fluentd.prefix }}bin/bundle &&
+    {{ directories.fluentd.prefix }}bin/rake build &&
+    {{ directories.fluentd.prefix }}bin/gem install pkg/fluentd-{{ versions.fluentd }}.gem
+    chdir={{ directories.common.src }}fluentd-{{ versions.fluentd }}
+
+- name: fluentd = Be sure Basic Plugins are installed.
+  shell: >
+    source /etc/profile.d/fluentd.sh &&
+    {{ directories.fluentd.prefix }}bin/fluent-gem install fluent-plugin-tail-ex &&
+    {{ directories.fluentd.prefix }}bin/fluent-gem install fluent-plugin-forest &&
+    {{ directories.fluentd.prefix }}bin/bundle config build.nokogiri --use-system-libraries &&
+    {{ directories.fluentd.prefix }}bin/fluent-gem install nokogiri -- --use-system-libraries &&
+    {{ directories.fluentd.prefix }}bin/fluent-gem install fluent-plugin-s3 &&
+    {{ directories.fluentd.prefix }}bin/fluent-gem install fluent-mixin-plaintextformatter
+
+- name: fluentd = Be sure init script is created.
+  template: src=init/init_fluentd.j2 dest=/etc/init.d/fluentd owner=root group=root mode=0744
+
+- name: Be sure fluentd conf is created.
+  template: src=conf/fluent.conf.j2 dest=/etc/fluent/fluent.conf backup=no owner=fluentd group=fluentd mode=0644
+
+- name: fluentd = Be sure fluentd is restarted.
+  service: name=fluentd state=restarted enabled=yes

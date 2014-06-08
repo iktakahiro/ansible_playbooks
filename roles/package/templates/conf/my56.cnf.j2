@@ -1,0 +1,88 @@
+[client]
+default-character-set = utf8
+port            = 3306
+socket          = /tmp/mysql.sock
+
+[mysql]
+no_auto_rehash
+
+[mysqld]
+datadir         = {{ directories.MySQL.data }}
+port            = 3306
+socket          = /tmp/mysql.sock
+skip_external_locking
+key_buffer = {{ MySQL.key_buffer | default("32M") }}
+max_allowed_packet = {{ MySQL.max_allowed_packet | default("8M") }}
+table_open_cache = {{ MySQL.table_open_cache | default(256) }}
+max_connections = {{ MySQL.max_connections | default(1024) }}
+max_connect_errors = {{ MySQL.max_connect_errors | default(10000) }}
+sort_buffer_size = {{ MySQL.sort_buffer_size | default("1M") }}
+read_buffer_size = {{ MySQL.read_buffer_size | default("1M") }}
+myisam_sort_buffer_size = {{ MySQL.myisam_sort_buffer_size | default("1M") }}
+thread_cache = {{ MySQL.thread_cache | default(256) }}
+query_cache_size = {{ MySQL.query_cache_size | default(0) }}
+query_cache_type = {{ MySQL.query_cache_type | default(0) }}
+tmp_table_size = {{ MySQL.tmp_table_size | default("64M") }}
+max_heap_table_size = {{ MySQL.max_heap_table_size | default("64M") }}
+
+skip_name_resolve
+character_set_server = utf8
+default_storage_engine = InnoDB
+explicit_defaults_for_timestamp
+
+sql_mode = "STRICT_ALL_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE"
+
+log_bin = mysql-bin
+binlog_format = MIXED
+binlog_checksum = CRC32 # NONE for back compatibility
+master_info_repository = TABLE # FILE for back compatibility
+relay_log_info_repository = TABLE # FILE for back compatibility
+relay_log = relay-mysql-bin
+log_slave_updates
+replicate_ignore-db = mysql
+expire_logs_days = 7
+
+slow_query_log
+long_query_time = 1
+log-slow-slave-statements
+
+server-id = {{ 4000000000 |random}}
+
+innodb_strict_mode
+innodb_data_file_path = ibdata1:10M:autoextend
+innodb_data_home_dir = {{ directories.MySQL.data }}
+innodb_file_format = Barracuda
+innodb_file_per_table
+
+innodb_buffer_pool_size = {{ MySQL.innodb_buffer_pool_size | default("4G") }}
+innodb_buffer_pool_instances = {{ MySQL.innodb_buffer_pool_instances | default(4) }}
+innodb_write_io_threads = {{ MySQL.innodb_write_io_threads | default(8) }}
+innodb_read_io_threads = {{ MySQL.innodb_read_io_threads | default(8) }}
+innodb_thread_concurrency = {{ MySQL.innodb_thread_concurrency | default(0) }}
+innodb_flush_log_at_trx_commit = {{ MySQL.innodb_flush_log_at_trx_commit | default(1) }}
+innodb_log_file_size = {{ MySQL.innodb_log_file_size | default("128M") }}
+innodb_log_buffer_size = {{ MySQL.innodb_log_buffer_size | default("16M") }}
+innodb_log_files_in_group = {{ MySQL.innodb_log_files_in_group | default(2) }}
+innodb_lock_wait_timeout = {{ MySQL.innodb_lock_wait_timeout | default(120) }}
+innodb_io_capacity = {{ MySQL.innodb_io_capacity | default(200) }}
+
+innodb_log_files_in_group = 2
+innodb_flush_method=O_DIRECT
+innodb_buffer_pool_load_at_startup = 1
+innodb_buffer_pool_dump_at_shutdown = 1
+innodb_checksum_algorithm = CRC32 # InnoDB for back compatibility
+innodb_large_prefix = 1
+innodb_print_all_deadlocks =1
+
+[mysqldump]
+quick
+max_allowed_packet = {{ MySQL.max_allowed_packet | default("200M") }}
+
+[myisamchk]
+key_buffer = 8M
+sort_buffer_size = 8M
+read_buffer = 1M
+write_buffer = 0M
+
+[mysqld_safe]
+open-files-limit = 8192

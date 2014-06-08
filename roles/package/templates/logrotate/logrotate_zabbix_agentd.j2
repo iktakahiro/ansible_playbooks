@@ -1,0 +1,12 @@
+/var/log/zabbix/*\.log {
+    daily
+    missingok
+    rotate 14
+    dateext
+    compress
+    ifempty
+    sharedscripts
+    postrotate
+        [ ! -f /var/run/zabbix/zabbix_agentd.pid ] || kill -USR1 `cat /var/run/zabbix/zabbix_agentd.pid`
+    endscript
+}

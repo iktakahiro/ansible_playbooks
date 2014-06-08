@@ -1,0 +1,22 @@
+---
+- name: Be sure OpenSSL tar ball is downloaded.
+  get_url: url={{ base.get_url }}openssl-{{ versions.OpenSSL }}.tar.gz dest={{ directories.common.src }}
+  tags: common
+
+- name: Be sure OpenSSL old source is deleted.
+  file: path={{ directories.common.src }}openssl-{{ versions.OpenSSL }} state=absent
+
+- name: Be sure OpenSSL tarball is expanded.
+  command: tar zxf openssl-{{ versions.OpenSSL }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure OpenSSL is installed.
+  shell: >
+    ./config
+    --prefix=/usr/
+    --openssldir=/etc/pki/tls
+    no-asm
+    -fPIC
+    shared &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}openssl-{{ versions.OpenSSL }}
