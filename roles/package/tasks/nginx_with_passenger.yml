@@ -1,5 +1,5 @@
 ---
-- name: Nginx = Be sure dependency packages are installed.
+- name: Be sure dependency packages are installed.
   yum: name={{ item }} state=installed
   with_items:
     - pcre
@@ -15,51 +15,48 @@
   with_items:
     - nginx
 
-- name: Be sure Nginx directory is created.
-  file: path={{ item }} state=directory owner=nginx group=nginx mode=755
-  with_items:
-      - "{{ directories.Nginx.run }}"
-      - "{{ directories.Nginx.log }}"
-      - "{{ directories.Nginx.prefix }}conf.d"
-      - "{{ directories.Nginx.prefix }}ssl"
+- name: Be sure Nginx data run directory is created.
+  file: path=/var/run/nginx state=directory owner=nginx group=nginx mode=755
+
+- name: Be sure Nginx data log directory is created.
+  file: path=/var/log/nginx state=directory owner=nginx group=nginx mode=755
 
 - name: Be sure Nginx tarball is downloaded.
   get_url: url={{ base.get_url }}nginx-{{ versions.Nginx }}.tar.gz dest={{ directories.common.src }}
 
 - name: Be sure Nginx tarball is expanded.
-  command: tar zxf nginx-{{ versions.Nginx }}.tar.gz chdir={{ directories.common.src }}
+  command:  tar zxf nginx-{{ versions.Nginx }}.tar.gz chdir={{ directories.common.src }}
 
 - name: Be sure zlib tarball is downloaded.
   get_url: url={{ base.get_url }}zlib-{{ versions.zlib }}.tar.gz dest={{ directories.common.src }}
 
 - name: Be sure zlib tarball is expanded.
-  command: tar zxf zlib-{{ versions.zlib }}.tar.gz chdir={{ directories.common.src }}
+  command:  tar zxf zlib-{{ versions.zlib }}.tar.gz chdir={{ directories.common.src }}
 
 - name: Be sure OpenSSL tarball is downloaded.
   get_url: url={{ base.get_url }}openssl-{{ versions.OpenSSL }}.tar.gz dest={{ directories.common.src }}
 
 - name: Be sure OpenSSL tarball is expanded.
-  command: tar zxf openssl-{{ versions.OpenSSL }}.tar.gz chdir={{ directories.common.src }}
+  command:  tar zxf openssl-{{ versions.OpenSSL }}.tar.gz chdir={{ directories.common.src }}
 
 - name: Be sure Nginx is installed.
   shell: >
-    mv -f /usr/bin/pod2man /usr/bin/mv_pod2man &&
     ./configure
     --prefix={{ directories.Nginx.prefix }}
     --user=nginx
     --group=nginx
-    --pid-path={{ directories.Nginx.run }}nginx.pid
-    --lock-path={{ directories.Nginx.run }}nginx.lock
-    --error-log-path={{ directories.Nginx.log }}error.log
-    --http-log-path={{ directories.Nginx.log }}access.log
-    --with-openssl={{ directories.common.src }}openssl-{{ versions.OpenSSL }}
-    --with-zlib={{ directories.common.src}}zlib-{{ versions.zlib }}
+    --pid-path=/var/run/nginx/nginx.pid
+    --lock-path=/var/run/nginx/nginx.lock
+    --error-log-path=/var/log/nginx/error.log
+    --http-log-path=/var/log/nginx/access.log
+    --with-openssl=/usr/local/src/openssl-{{ versions.OpenSSL }}
+    --with-zlib=/usr/local/src/zlib-{{ versions.zlib }}
     --with-http_ssl_module
     --with-http_realip_module
-    --without-http_ssi_module &&
+    --without-http_ssi_module
+    --add-module=/usr/local/ruby/lib/ruby/gems/2.0.0/gems/passenger-4.0.2/ext/nginx &&
     make &&
-    make install &&
-    mv -f /usr/bin/mv_pod2man /usr/bin/pod2man
+    make install
     chdir={{ directories.common.src }}nginx-{{ versions.Nginx }}
 
 - name: Be sure init script is created.
@@ -67,9 +64,3 @@
 
 - name: Be sure logrotate script is created.
   template: src=logrotate/logrotate_nginx.j2 dest=/etc/logrotate.d/nginx owner=root group=root mode=0744
-
-- name: Be sure Nginx base conf is created.
-  template: src=conf/nginx.conf.j2 dest={{ directories.Nginx.prefix }}conf/nginx.conf backup=yes owner=nginx group=nginx mode=0644
-
-- name: Be sure Nginx is restarted.
-  service: name=nginx state=started enabled=yes

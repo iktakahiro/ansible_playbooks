@@ -1,0 +1,12 @@
+---
+- name: Be sure /etc/security/limits.conf _ root soft is configured.
+  lineinfile: dest=/etc/security/limits.conf line='root soft nofile 65536'
+
+- name: Be sure /etc/security/limits.conf _ root hard  is configured.
+  lineinfile: dest=/etc/security/limits.conf line='root hard nofile 65536'
+
+- name: Be sure /etc/security/limits.conf _ * soft is configured.
+  lineinfile: dest=/etc/security/limits.conf line='* soft nofile 65536'
+
+- name: Be sure /etc/security/limits.conf _ * hard  is configured.
+  lineinfile: dest=/etc/security/limits.conf line='* hard nofile 65536'

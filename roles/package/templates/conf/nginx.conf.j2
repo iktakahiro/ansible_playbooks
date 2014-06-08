@@ -1,0 +1,56 @@
+user nginx;
+worker_processes {{ ansible_processor_vcpus }};
+worker_rlimit_nofile 4096;
+worker_priority 0;
+#worder_cpu_affinity 01 10;
+
+error_log {{ directories.Nginx.log }}error.log notice;
+# pid      logs/nginx.pid;
+
+events {
+    worker_connections 1024;
+    multi_accept       off;
+}
+
+http {
+    server_tokens off;
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    log_format  ltsv  'time:$time_local\t'
+                      'host:$remote_addr\t'
+                      'request:$request\t'
+                      'method:$request_method\t'
+                      'uri:$request_uri\t'
+                      'status:$status\t'
+                      'size:$body_bytes_sent\t'
+                      'referer:$http_referer\t'
+                      'ua:$http_user_agent\t'
+                      'reqtime:$request_time\t'
+                      'upsttime:$upstream_response_time\t';
+
+    access_log {{ directories.Nginx.log }}access.log  ltsv;
+
+    sendfile on;
+    keepalive_timeout 0;
+
+    gzip on;
+    gzip_proxied any;
+    gzip_buffers 128 4k;
+    gzip_min_length 1k;
+    gzip_types text/css text/javascript application/x-javascript application/json;
+
+    ssl_protocols SSLv3;
+    ssl_ciphers HIGH:!aNULL:!MD5:!ADH:!EXPORT56:!IDEA:!RC4;
+    ssl_prefer_server_ciphers on;
+
+    ssl_session_cache    shared:SSL:1m;
+    ssl_session_timeout  5m;
+
+    include {{ directories.Nginx.prefix }}conf.d/*.conf;
+
+}

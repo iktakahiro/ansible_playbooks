@@ -1,0 +1,39 @@
+# HTTPS server
+server {
+    listen       443;
+    server_name  {{ item.server_name }}t;
+
+    access_log {{ directories.Nginx.log }}ssl_{{ item.server_name }}_access.log ltsv;
+    error_log {{ directories.Nginx.log }}ssl_{{ item.server_name }}_error.log notice;
+
+    ssl on;
+
+    ssl_certificate      /usr/local/nginx/ssl/2014.04.11_albert2005.net.cert;
+    ssl_certificate_key  /usr/local/nginx/ssl/2014.04.11_albert2005.net.key;
+
+    ssl_protocols SSLv3;
+    ssl_ciphers HIGH:!aNULL:!MD5:!ADH:!EXPORT56:!IDEA:!RC4;
+    ssl_prefer_server_ciphers on;
+
+    ssl_session_cache    shared:SSL:1m;
+    ssl_session_timeout  5m;
+
+    location / {
+        root   {{ item.doc_root }};
+        index  index.html index.php;
+
+        satisfy any;
+        allow 114.179.75.252;
+        deny all;
+
+        auth_basic "basic authentication";
+        auth_basic_user_file {{ directories.Nginx.prefix }}conf/htpasswd;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass   127.0.0.1:9000;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME  {{ item.doc_root }}$fastcgi_script_name;
+        include        fastcgi_params;
+    }
+}

@@ -25,6 +25,7 @@
     make &&
     make install
     chdir={{ directories.common.src }}cmake-{{ versions.CMake }}
+    creates=/usr/local/bin/cmake
 
 - name: Be sure MySQL tarball is downloaded.
   get_url: url={{ base.get_url }}mysql-{{ versions.MySQL }}.tar.gz dest={{ directories.common.src }}
@@ -53,4 +54,18 @@
   template: src=profile/profile_mysql.j2 dest=/etc/profile.d/mysql.sh owner=root group=root mode=0644
 
 - name: Be sure my.cnf is created.
-  template: src=conf/my.cnf.j2 dest=/etc/my.cnf owner=mysql group=mysql mode=0644
+  template: src=conf/my56.cnf.j2 dest=/etc/my.cnf owner=mysql group=mysql mode=0644
+
+- name: MySQL = Be sure install_db is excecuted.
+  shell: >
+    "{{ directories.MySQL.prefix }}"scripts/mysql_install_db --user=mysql --basedir={{ directories.MySQL.prefix}} --datadir={{ directories.MySQL.data}}
+    creates={{ directories.MySQL.data }}ibdata1
+
+- name: MySQL = Be sure MySQL is started.
+  service: name=mysql state=started enabled=yes
+
+- name: MySQL = Be sure test db is droped.
+  ignore_errors: yes
+  shell: >
+    "{{ directories.MySQL.prefix}}"bin/mysql -u root -e "DROP DATABASE IF EXISTS test;"
+    removes={{ directories.MySQL.data }}test

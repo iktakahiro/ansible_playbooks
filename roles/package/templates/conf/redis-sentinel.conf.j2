@@ -1,0 +1,11 @@
+port 6379
+bind 0.0.0.0
+daemonize yes
+logfile "{{ directories.Redis.log }}redis-sentinel.log"
+pidfile "{{ directories.Redis.run }}redis-sentinel.pid"
+dir {{ directories.Redis.data }}
+
+sentinel monitor mymaster {{ Redis.master }} 6379 1
+sentinel down-after-milliseconds mymaster 10000
+sentinel failover-timeout mymaster 900000
+sentinel client-reconfig-script mymaster /etc/redis/rewrite_hosts.sh

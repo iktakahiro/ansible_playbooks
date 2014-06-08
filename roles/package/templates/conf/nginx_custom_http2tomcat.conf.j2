@@ -1,0 +1,13 @@
+# HTTPS server
+server {
+    listen       80;
+    server_name  {{ item.server_name }};
+
+    access_log {{ directories.Nginx.log }}{{ item.server_name }}_access.log ltsv;
+    error_log {{ directories.Nginx.log }}{{ item.server_name }}_error.log notice;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        break;
+    }
+}

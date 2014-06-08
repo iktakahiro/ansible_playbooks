@@ -1,7 +1,7 @@
 /var/log/nginx/*\.log {
     daily
     missingok
-    rotate {{ nginx_rotate_value }}
+    rotate 14
     dateext
     compress
     ifempty

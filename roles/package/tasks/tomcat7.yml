@@ -34,3 +34,11 @@
 - name: Be sure setenv created.
   template: src=profile/setenv_tomcat7.j2 dest={{ directories.Tomcat.prefix}}bin/setenv.sh owner=tomcat group=tomcat mode=0755
 
+- name: Be sure unnecessary directories are deleted.
+  file: path={{ directories.Tomcat.prefix }}/webapps/{{ item }} state=absent
+  with_items:
+      - ROOT
+      - docs
+      - host-manager
+      - manager
+      - examples

@@ -1,0 +1,55 @@
+---
+- name: Be sure libgmp is downloaded.
+  get_url: url={{ base.get_url }}gmp-{{ versions.gmp }}.tar.gz dest={{ directories.common.src }}
+
+- name: Be sure libgmp is expanded.
+  command: tar zxf gmp-{{ versions.gmp }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure libgmp is installed.
+  shell: >
+    ./configure
+    --libdir=/usr/local/lib64 &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}gmp-{{ versions.gmp }}
+
+- name: Be sure Python3.3 tarball is downloaded.
+  get_url: url={{ base.get_url }}Python-{{ versions.Python33 }}.tgz dest={{ directories.common.src }}
+
+- name: Be sure Python3.3 tarball is expanded.
+  command: tar zxf Python-{{ versions.Python33 }}.tgz chdir={{ directories.common.src }}
+
+- name: Be sure Python3.3 is installed.
+  shell: >
+    ./configure
+    --prefix={{ directories.Python33.prefix }}
+    --enable-shared &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}Python-{{ versions.Python33 }}
+
+- name: Be sure symbolic link of Python3.3 binary is created.
+  file: src={{ directories.Python33.prefix }}bin/python3 dest={{ directories.Python33.prefix }}bin/python state=link
+
+- name: Be sure ld.so.conf is configured.
+  lineinfile: dest=/etc/ld.so.conf line={{ directories.Python33.prefix }}lib
+
+- name: Be sure ld.so.conf is reloaded.
+  command: ldconfig
+
+- name: Be sure setuptools is downloaded.
+  get_url: url={{ base.get_url }}ez_setup.py dest={{ directories.common.src }}
+
+- name: Be sure setuptools is installed.
+  shell: >
+    {{ directories.Python3.3.prefix }}bin/python3 ez_setup.py install
+    chdir={{ directories.common.src }}
+
+- name: Be sure pip is installed.
+  easy_install: name=pip executable={{ directories.Python33.prefix }}bin/easy_install
+
+- name: Be sure awscli is installed.
+  pip: name=awscli executable={{ directories.Python33.prefix }}bin/pip
+
+- name: Be sure profile is created.
+  template: src=profile/profile_python33.j2 dest=/etc/profile.d/python33.sh owner=root group=root mode=0644

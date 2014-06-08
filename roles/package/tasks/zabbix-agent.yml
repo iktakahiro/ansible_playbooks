@@ -1,0 +1,45 @@
+---
+- name: Be sure Zabbix groups are created.
+  group: name={{ item }}
+  with_items:
+    - zabbix
+
+- name: Be sure Zabbix users are created.
+  user: name={{ item }} shell=/sbin/nologin group={{ item }} groups={{ item }}
+  with_items:
+    - zabbix
+
+- name: Be sure Zabbix tar ball is downloaded.
+  get_url: url={{ base.get_url }}zabbix-{{ versions.Zabbix }}.tar.gz dest={{ directories.common.src }}
+  tags: common
+
+- name: Be sure Zabbix tarball is expanded.
+  command: tar zxf zabbix-{{ versions.Zabbix }}.tar.gz chdir={{ directories.common.src }}
+
+- name: Be sure Zabbix-agnet is installed.
+  shell: >
+    ./configure
+    --prefix={{ directories.Zabbix.prefix }}
+    --enable-agent
+    --with-net-snmp &&
+    make &&
+    make install
+    chdir={{ directories.common.src }}zabbix-{{ versions.Zabbix }}
+
+- name: Be sure Zabbix-agent directory is created.
+  file: path={{ item }} state=directory owner=zabbix group=zabbix mode=0700
+  with_items:
+      - "{{ directories.Zabbix.log }}"
+      - "{{ directories.Zabbix.run }}"
+
+- name: Be sure zabbix_agent.conf  is created.
+  template: src=conf/zabbix_agentd.conf.j2 dest={{ directories.Zabbix.prefix }}etc/zabbix_agentd.conf owner=root group=root mode=0644
+
+- name: Be sure init script is created.
+  template: src=init/init_zabbix_agentd.j2 dest=/etc/init.d/zabbix_agentd owner=root group=root mode=0744
+
+- name: Be sure Zabbix-agent is started.
+  service: name=zabbix_agentd state=started enabled=yes
+
+- name: Be sure logrotate script is created.
+  template: src=logrotate/logrotate_zabbix_agentd.j2 dest=/etc/logrotate.d/zabbix_agentd owner=root group=root mode=0744

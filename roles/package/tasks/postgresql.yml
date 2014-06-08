@@ -31,6 +31,9 @@
     make install
     chdir={{ directories.common.src }}postgresql-{{ versions.PostgreSQL }}
 
+- name: Be sure ld.so.conf is configured.
+  lineinfile: dest=/etc/ld.so.conf line={{ directories.PostgreSQL.prefix }}lib
+
 - name: Be sure init script is created.
   template: src=init/init_postgres.j2 dest=/etc/init.d/postgres owner=root group=root mode=0744
 
