@@ -1,6 +1,6 @@
 # Ansible Playbooks
 
-version 1.1.0
+Version 1.1.0
 Released: 08-Jun-2014
 
 ## What is this
